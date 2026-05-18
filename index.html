@@ -46,8 +46,8 @@
       <!-- 頂部標題與核心資訊 -->
       <div class="flex justify-between items-center mb-6 px-1">
         <div>
-          <h1 class="text-2xl font-bold text-[#5C4636]">關西之旅 6Days</h1>
-          <p class="text-xs text-[#A39382] mt-0.5">2026 June 4 - June 9</p>
+          <h1 class="text-2xl font-bold text-[#5C4636]">關西6日之旅</h1>
+          <p class="text-xs text-[#A39382] mt-0.5">June 4-9 2026</p>
         </div>
         <div class="bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-[#E8DFD8] text-xs font-medium text-[#7A685A]">
           <i class="fa-solid fa-wallet mr-1 text-[#8C7662]"></i> 1 JPY = {{ exchangeRate }} HKD
@@ -479,7 +479,7 @@
       setup() {
         const activeTab = ref('itinerary');
         const currentDayIndex = ref(0);
-        const exchangeRate = ref(0.051); // 1 JPY = 0.051 HKD
+        const exchangeRate = ref(0.050); // 1 JPY = 0.050 HKD
         const splitPeople = ref(2);
 
         // 預設資料 (和歌山x2, 神戶x1, 大阪x3)
