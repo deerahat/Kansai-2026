@@ -106,9 +106,6 @@
             <div class="flex-1 bg-white rounded-2xl p-4 border border-[#E8DFD8] hover:border-[#8C7662] transition-colors shadow-sm">
               <div class="flex justify-between items-start">
                 <h4 class="font-bold text-[#4A3E3D] text-base">{{ item.location }}</h4>
-                <span class="text-[11px] bg-[#FAF6F0] text-[#8C7662] px-2 py-0.5 rounded-md flex items-center">
-                  <i class="fa-solid fa-temperature-three-quarters mr-1 scale-90"></i>{{ item.cardTemp || days[currentDayIndex].temp }}°C
-                </span>
               </div>
               <p v-if="item.note" class="text-xs text-[#7A685A] mt-2 bg-[#FAF6F0] p-2.5 rounded-xl border border-[#F2EAE1] italic">
                 <i class="fa-regular fa-comment-dots mr-1 opacity-70"></i>{{ item.note }}
@@ -435,10 +432,6 @@
           <div>
             <label class="text-xs font-bold text-[#7A685A] block mb-1">地點名稱</label>
             <input type="text" v-model="modalData.location" placeholder="輸入景點或餐廳名稱" class="w-full px-4 py-2.5 rounded-xl border border-[#E8DFD8] bg-[#FAF6F0] text-sm focus:outline-none focus:border-[#8C7662]">
-          </div>
-          <div>
-            <label class="text-xs font-bold text-[#7A685A] block mb-1">卡片氣溫 (°C)</label>
-            <input type="number" v-model="modalData.cardTemp" placeholder="留空則沿用當天預設氣溫" class="w-full px-4 py-2.5 rounded-xl border border-[#E8DFD8] bg-[#FAF6F0] text-sm focus:outline-none focus:border-[#8C7662]">
           </div>
           <div>
             <label class="text-xs font-bold text-[#7A685A] block mb-1">備註資訊</label>
