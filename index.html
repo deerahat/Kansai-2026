@@ -107,14 +107,14 @@
               <div class="flex justify-between items-start">
                 <h4 class="font-bold text-[#4A3E3D] text-base">{{ item.location }}</h4>
               </div>
-              <p v-if="item.openinghours" class="text-xs">
+              <p v-if="item.openinghours" class="text-xs mt-2">
                 <i class="fa-regular fa-clock mr-1 opacity-70"></i>{{ item.openinghours }}
               </p>
-              <p v-if="item.parking" class="text-xs">
+              <p v-if="item.parking" class="text-xs mt-2">
                 <i class="fa-solid fa-square-parking mr-1 opacity-70"></i>{{ item.parking }}
               </p>
               <p v-if="item.note" class="text-xs text-[#7A685A] mt-2 bg-[#FAF6F0] p-2.5 rounded-xl border border-[#F2EAE1] italic">
-                <i class="fa-solid fa-square-parking mr-1 opacity-70"></i>{{ item.note }}
+                <i class="fa-regular fa-comment-dots mr-1 opacity-70"></i>{{ item.note }}
               </p>
             </div>
           </div>
