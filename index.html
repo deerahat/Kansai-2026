@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>關西自由行 2026</title>
+  <title>Kansai 2026</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Vue 3 -->
@@ -36,7 +36,7 @@
     
     <!-- 頁首 Banner 區塊 -->
     <div class="relative w-full h-52 bg-[#E6DCD3] overflow-hidden shrink-0">
-      <img src="Cover banner.png" alt="Cover Banner" class="w-full h-full object-cover">
+      <img src="https://i.postimg.cc/kMHPx2bP/Cover-banner-3.png" alt="Cover Banner" class="w-full h-full object-cover">
       <div class="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent"></div>
     </div>
 
@@ -160,10 +160,10 @@
         </div>
 
         <!-- 新增記帳表單 -->
-        <div class="bg-white rounded-2xl p-5 border border-[#E8DFD8] shadow-sm">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#E8DFD8] shadow-sm w-full box-border">
           <h4 class="font-bold text-[#5C4636] mb-3 text-sm">記錄新一筆花費</h4>
-          <div class="space-y-3">
-            <div class="flex space-x-2">
+          <div class="flex flex-col gap-3">
+            <div class="grid grid-cols-3 gap-2">
               <input type="text" v-model="newExpense.title" placeholder="品項名稱 (如: 晚餐)" class="flex-1 px-4 py-2.5 rounded-xl border border-[#E8DFD8] bg-[#FAF6F0] text-sm focus:outline-none focus:border-[#8C7662]">
               <select v-model="newExpense.category" class="px-3 py-2.5 rounded-xl border border-[#E8DFD8] bg-[#FAF6F0] text-sm focus:outline-none text-[#7A685A]">
                 <option value="餐飲">🍱 餐飲</option>
