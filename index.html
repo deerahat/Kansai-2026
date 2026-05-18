@@ -195,12 +195,12 @@
         </div>
 
         <!-- 記帳明細列表 -->
-        <div class="space-y-4">
+        <div class="flex flex-col gap-3">
           <div class="flex justify-between items-center px-1">
             <span class="text-xs font-bold text-[#7A685A] uppercase tracking-wider">消費明細表</span>
             <span class="text-xs text-[#A39382]">共 {{ expenses.length }} 筆</span>
           </div>
-          <div class="space-y-2 max-h-[350px] overflow-y-auto pr-1 no-scrollbar">
+          <div class="space-y-4 max-h-[350px] overflow-y-auto pr-1 no-scrollbar">
             <div v-for="exp in expenses" :key="exp.id" class="bg-white rounded-xl p-3.5 border border-[#E8DFD8] flex justify-between items-center shadow-sm">
               <div class="flex items-center space-x-3">
                 <div class="w-8 h-8 rounded-full bg-[#FAF6F0] flex items-center justify-center text-xs">
