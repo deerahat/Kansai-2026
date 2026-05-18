@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kansai 2026</title>
+  <title>關西自由行 2026</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Vue 3 -->
@@ -36,7 +36,7 @@
     
     <!-- 頁首 Banner 區塊 -->
     <div class="relative w-full h-52 bg-[#E6DCD3] overflow-hidden shrink-0">
-      <img src="https://i.postimg.cc/kMHPx2bP/Cover-banner-3.png" alt="Cover Banner" class="w-full h-full object-cover">
+      <img src="Cover banner.png" alt="Cover Banner" class="w-full h-full object-cover">
       <div class="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent"></div>
     </div>
 
@@ -107,6 +107,7 @@
               <div class="flex justify-between items-start">
                 <h4 class="font-bold text-[#4A3E3D] text-base">{{ item.location }}</h4>
                 <span class="text-[11px] bg-[#FAF6F0] text-[#8C7662] px-2 py-0.5 rounded-md flex items-center">
+                  <i class="fa-solid fa-temperature-three-quarters mr-1 scale-90"></i>{{ item.cardTemp || days[currentDayIndex].temp }}°C
                 </span>
               </div>
               <p v-if="item.note" class="text-xs text-[#7A685A] mt-2 bg-[#FAF6F0] p-2.5 rounded-xl border border-[#F2EAE1] italic">
@@ -139,7 +140,7 @@
           <h3 class="font-bold text-[#5C4636] mb-3 text-sm flex items-center">
             <i class="fa-solid fa-calculator mr-2 text-[#8C7662]"></i>智慧換算與分帳
           </h3>
-          <div class="grid grid-cols-2 gap-2 mb-4">
+          <div class="grid grid-cols-2 gap-3 mb-4">
             <div class="bg-[#FAF6F0] p-3 rounded-xl border border-[#F2EAE1]">
               <span class="text-[11px] text-[#A39382] block">即時匯率設定 (1日幣)</span>
               <input type="number" step="0.001" v-model="exchangeRate" class="w-full bg-transparent font-bold text-base text-[#4A3E3D] focus:outline-none mt-1">
@@ -162,13 +163,12 @@
         </div>
 
         <!-- 新增記帳表單 -->
-        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#E8DFD8] shadow-sm w-full box-border">
+        <div class="bg-white rounded-2xl p-5 border border-[#E8DFD8] shadow-sm">
           <h4 class="font-bold text-[#5C4636] mb-3 text-sm">記錄新一筆花費</h4>
-          <div class="flex flex-col gap-3">
-            
-            <div class="grid grid-cols-3 gap-2">
-              <input type="text" v-model="newExpense.title" placeholder="品項名稱 (如: 晚餐)" class="col-span-2 px-3 py-2.5 rounded-xl border border-[#E8DFD8] bg-[#FAF6F0] text-sm focus:outline-none focus:border-[#8C7662] min-w-0">
-              <select v-model="newExpense.category" class="col-span-1 px-2 py-2.5 rounded-xl border border-[#E8DFD8] bg-[#FAF6F0] text-sm focus:outline-none text-[#7A685A] min-w-0">
+          <div class="space-y-3">
+            <div class="flex space-x-2">
+              <input type="text" v-model="newExpense.title" placeholder="品項名稱 (如: 晚餐)" class="flex-1 px-4 py-2.5 rounded-xl border border-[#E8DFD8] bg-[#FAF6F0] text-sm focus:outline-none focus:border-[#8C7662]">
+              <select v-model="newExpense.category" class="px-3 py-2.5 rounded-xl border border-[#E8DFD8] bg-[#FAF6F0] text-sm focus:outline-none text-[#7A685A]">
                 <option value="餐飲">🍱 餐飲</option>
                 <option value="交通">🚇 交通</option>
                 <option value="住宿">🏨 住宿</option>
@@ -176,17 +176,15 @@
                 <option value="景點">🎟️ 景點</option>
               </select>
             </div>
-            
-            <div class="flex sm:flex-row flex-col gap-3 sm:items-center">
-              <div class="flex flex-1 items-center gap-2">
-                <div class="flex-1 relative">
+            <div class="flex items-center space-x-3">
+              <div class="flex-1 relative">
                 <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-[#A39382]">¥</span>
                 <input type="number" v-model="newExpense.amountJPY" placeholder="輸入日幣金額" class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-[#E8DFD8] bg-[#FAF6F0] text-sm focus:outline-none focus:border-[#8C7662]">
               </div>
               <div class="text-xs text-[#A39382] w-24 truncate">
                 ≈ HK$ {{ (newExpense.amountJPY * exchangeRate).toFixed(1) }}
               </div>
-              <button @Pro @click="addExpense" class="bg-[#5C4636] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-[#4A3728] transition-colors shrink-0">
+              <button @click="addExpense" class="bg-[#5C4636] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-[#4A3728] transition-colors shrink-0">
                 記帳
               </button>
             </div>
@@ -194,12 +192,12 @@
         </div>
 
         <!-- 記帳明細列表 -->
-        <div class="flex flex-col gap-5">
+        <div class="space-y-2">
           <div class="flex justify-between items-center px-1">
             <span class="text-xs font-bold text-[#7A685A] uppercase tracking-wider">消費明細表</span>
             <span class="text-xs text-[#A39382]">共 {{ expenses.length }} 筆</span>
           </div>
-          <div class="space-y-4 max-h-[350px] overflow-y-auto pr-1 no-scrollbar">
+          <div class="space-y-2 max-h-[350px] overflow-y-auto pr-1 no-scrollbar">
             <div v-for="exp in expenses" :key="exp.id" class="bg-white rounded-xl p-3.5 border border-[#E8DFD8] flex justify-between items-center shadow-sm">
               <div class="flex items-center space-x-3">
                 <div class="w-8 h-8 rounded-full bg-[#FAF6F0] flex items-center justify-center text-xs">
@@ -367,10 +365,10 @@
             <div class="text-center w-24">
               <h4 class="text-2xl font-bold text-[#5C4636] tracking-tight">HKG</h4>
               <p class="text-xs text-[#A39382] mt-0.5">香港國際機場</p>
-              <p class="text-xs font-bold text-[#4A3E3D] mt-2">00:55</p>
+              <p class="text-xs font-bold text-[#4A3E3D] mt-2">01:35</p>
             </div>
             <div class="flex-1 flex flex-col items-center px-2">
-              <span class="text-[10px] text-[#A39382] font-mono">3h 50m</span>
+              <span class="text-[10px] text-[#A39382] font-mono">4h 00m</span>
               <div class="w-full flex items-center my-1">
                 <div class="w-1.5 h-1.5 rounded-full bg-[#E8DFD8]"></div>
                 <div class="flex-1 border-t-2 border-dashed border-[#E8DFD8] mx-1"></div>
@@ -382,7 +380,7 @@
             <div class="text-center w-24">
               <h4 class="text-2xl font-bold text-[#5C4636] tracking-tight">KIX</h4>
               <p class="text-xs text-[#A39382] mt-0.5">關西國際機場</p>
-              <p class="text-xs font-bold text-[#4A3E3D] mt-2">05:45</p>
+              <p class="text-xs font-bold text-[#4A3E3D] mt-2">06:35</p>
             </div>
           </div>
           <div class="border-t border-[#FAF6F0] pt-3 mt-4 text-xs text-[#7A685A]">出發日期：<strong>2026/06/04</strong></div>
@@ -398,10 +396,10 @@
             <div class="text-center w-24">
               <h4 class="text-2xl font-bold text-[#5C4636] tracking-tight">KIX</h4>
               <p class="text-xs text-[#A39382] mt-0.5">關西國際機場</p>
-              <p class="text-xs font-bold text-[#4A3E3D] mt-2">20:30</p>
+              <p class="text-xs font-bold text-[#4A3E3D] mt-2">21:10</p>
             </div>
             <div class="flex-1 flex flex-col items-center px-2">
-              <span class="text-[10px] text-[#A39382] font-mono">4h 25m</span>
+              <span class="text-[10px] text-[#A39382] font-mono">4h 05m</span>
               <div class="w-full flex items-center my-1">
                 <div class="w-1.5 h-1.5 rounded-full bg-[#E8DFD8]"></div>
                 <div class="flex-1 border-t-2 border-dashed border-[#E8DFD8] mx-1"></div>
@@ -413,7 +411,7 @@
             <div class="text-center w-24">
               <h4 class="text-2xl font-bold text-[#5C4636] tracking-tight">HKG</h4>
               <p class="text-xs text-[#A39382] mt-0.5">香港國際機場</p>
-              <p class="text-xs font-bold text-[#4A3E3D] mt-2">23:55</p>
+              <p class="text-xs font-bold text-[#4A3E3D] mt-2">01:15 <span class="text-[9px] text-red-500 font-medium">+1天</span></p>
             </div>
           </div>
           <div class="border-t border-[#FAF6F0] pt-3 mt-4 text-xs text-[#7A685A]">出發日期：<strong>2026/06/09</strong></div>
@@ -437,6 +435,10 @@
           <div>
             <label class="text-xs font-bold text-[#7A685A] block mb-1">地點名稱</label>
             <input type="text" v-model="modalData.location" placeholder="輸入景點或餐廳名稱" class="w-full px-4 py-2.5 rounded-xl border border-[#E8DFD8] bg-[#FAF6F0] text-sm focus:outline-none focus:border-[#8C7662]">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-[#7A685A] block mb-1">卡片氣溫 (°C)</label>
+            <input type="number" v-model="modalData.cardTemp" placeholder="留空則沿用當天預設氣溫" class="w-full px-4 py-2.5 rounded-xl border border-[#E8DFD8] bg-[#FAF6F0] text-sm focus:outline-none focus:border-[#8C7662]">
           </div>
           <div>
             <label class="text-xs font-bold text-[#7A685A] block mb-1">備註資訊</label>
