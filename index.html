@@ -488,57 +488,62 @@
   
   <!-- Vue App Logic Script -->
   <script>
-    const { createApp, ref, computed, watch, onMounted } = Vue;
+  // ✅ 修正 1：加入了 onMounted
+  const { createApp, ref, computed, watch, onMounted } = Vue;
 
-    createApp({
-      setup() {
-        // === 1. 初始化 Supabase 連線 ===
-        const SUPABASE_URL = 'https://nlfksgzxmfbakdorvnrw.supabase.co/rest/v1/';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sZmtzZ3p4bWZiYWtkb3J2bnJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNTk0OTEsImV4cCI6MjA5NDczNTQ5MX0._Zv3l163aFenWFKm3WTBLLhgmxSXV0cczr_KgI8hvm8';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  createApp({
+    setup() {
+      // === 1. 初始化 Supabase 連線 ===
+      // ✅ 修正 2：移除了結尾的 /rest/v1/
+      const SUPABASE_URL = 'https://nlfksgzxmfbakdorvnrw.supabase.co';
+      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sZmtzZ3p4bWZiYWtkb3J2bnJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNTk0OTEsImV4cCI6MjA5NDczNTQ5MX0._Zv3l163aFenWFKm3WTBLLhgmxSXV0cczr_KgI8hvm8';
+      
+      // ✅ 修正 3 & 4：拼字修正為 supabase，並將變數命名為 supabaseClient 避免衝突
+      const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // 同步狀態提示
-        const syncStatus = ref('雲端連線中...');
+      // 同步狀態提示
+      const syncStatus = ref('雲端連線中...');
 
-        const activeTab = ref('itinerary');
-        const currentDayIndex = ref(0);
-        const exchangeRate = ref(0.050);
-        const splitPeople = ref(2);
-        
-        // 預設初始資料 (當雲端沒資料時備用)
-        const defaultDays = [ /* 你原本的 6 天行程資料 */ ];
-        const defaultShoppingList = [ /* 你原本的購物清單資料 */ ];
+      const activeTab = ref('itinerary');
+      const currentDayIndex = ref(0);
+      const exchangeRate = ref(0.050);
+      const splitPeople = ref(2);
 
-        // 響應式變數
-        const days = ref([]);
-        const expenses = ref([]);
-        const shoppingList = ref([]);
+      // 預設初始資料 (記得把你的陣列內容貼回來！)
+      const defaultDays = [ /* 你原本的 6 天行程資料 */ ];
+      const defaultShoppingList = [ /* 你原本的購物清單資料 */ ];
 
-        // === 2. 核心：從雲端下載資料 (網頁開啟時執行) ===
-        const fetchFromCloud = async () => {
-          try {
-            syncStatus.value = '正在讀取雲端最新資料...';
-            const { data, error } = await supabaseClient
-               .from('travel_sync')
-              .select('payload')
-              .eq('id', 1)
-              .single();
+      // 響應式變數
+      const days = ref([]);
+      const expenses = ref([]);
+      const shoppingList = ref([]);
 
-            if (error) throw error;
+      // === 2. 核心：從雲端下載資料 (網頁開啟時執行) ===
+      const fetchFromCloud = async () => {
+        try {
+          syncStatus.value = '正在讀取雲端最新資料...';
+          // ✅ 使用 supabaseClient
+          const { data, error } = await supabaseClient
+            .from('travel_sync')
+            .select('payload')
+            .eq('id', 1)
+            .single();
 
-            // 如果雲端有打包好的資料，就覆蓋掉本地
-            if (data && data.payload && data.payload.days) {
-              days.value = data.payload.days;
-              expenses.value = data.payload.expenses;
-              shoppingList.value = data.payload.shoppingList;
-              syncStatus.value = '同步完成';
-            } else {
-              // 雲端是空的，載入預設值
-              days.value = defaultDays;
-              expenses.value = [];
-              shoppingList.value = defaultShoppingList;
-              syncStatus.value = '已載入預設資料';
-            }
+          if (error) throw error;
+
+          // 如果雲端有打包好的資料，就覆蓋掉本地
+          if (data && data.payload && data.payload.days) {
+            days.value = data.payload.days;
+            expenses.value = data.payload.expenses;
+            shoppingList.value = data.payload.shoppingList;
+            syncStatus.value = '同步完成';
+          } else {
+            // 雲端是空的，載入預設值
+            days.value = defaultDays;
+            expenses.value = [];
+            shoppingList.value = defaultShoppingList;
+            syncStatus.value = '已載入預設資料';
+          }
         } catch (err) {
           console.error(err);
           syncStatus.value = '雲端讀取失敗，改用本地備份';
@@ -549,13 +554,14 @@
       const saveToCloud = async () => {
         try {
           syncStatus.value = '雲端同步中...';
-        
+          
           const packet = {
             days: days.value,
             expenses: expenses.value,
             shoppingList: shoppingList.value
           };
 
+          // ✅ 使用 supabaseClient
           const { error } = await supabaseClient
             .from('travel_sync')
             .update({ payload: packet })
@@ -563,34 +569,33 @@
 
           if (error) throw error;
           syncStatus.value = '所有變更已儲存至雲端';
-      } catch (err) {
-        console.error(err);
-        syncStatus.value = '同步失敗，請檢查網路';
-      }
-    };
+        } catch (err) {
+          console.error(err);
+          syncStatus.value = '同步失敗，請檢查網路';
+        }
+      };
 
-    // 當網頁開啟時，自動連向雲端拿資料
-    onMounted(() => {
-      fetchFromCloud();
-    });
+      // 當網頁開啟時，自動連向雲端拿資料
+      onMounted(() => {
+        fetchFromCloud();
+      });
 
-    // 監聽資料變化：只要行程、記帳、購物清單有變動，自動同步到雲端
-    // (為了避免手機頻繁打字造成雲端負擔，你也可以做一個「手動儲存」按鈕來觸發 saveToCloud)
-    watch([days, expenses, shoppingList], () => {
-      saveToCloud();
-    }, { deep: true });
+      // 監聽資料變化
+      watch([days, expenses, shoppingList], () => {
+        saveToCloud();
+      }, { deep: true });
 
-    // === 以下保留你原本所有的 Functions (如 addExpense, saveEvent 等) ===
-    const newShoppingItem = ref('');
-    // ... 略 ...
-
-    return {
-      syncStatus, // 記得把狀態丟出去，可以在畫面上顯示提示字眼
-      activeTab, currentDayIndex, days, exchangeRate, splitPeople, expenses,
+      // === 以下保留你原本所有的 Functions (如 addExpense, saveEvent 等) ===
+      const newShoppingItem = ref('');
       // ... 略 ...
-    };
-  }
-}).mount('#app');
-  </script>
+
+      return {
+        syncStatus, 
+        activeTab, currentDayIndex, days, exchangeRate, splitPeople, expenses,
+        // ... 其他 return 略 ...
+      };
+    }
+  }).mount('#app');
+</script>
 </body>
 </html>
