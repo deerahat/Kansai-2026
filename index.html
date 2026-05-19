@@ -105,17 +105,17 @@
               {{ item.time }}
             </div>
             <!-- 卡片主體 -->
-            <div class="flex-1 bg-white rounded-2xl p-4 border border-[#E8DFD8] hover:border-[#8C7662] transition-colors shadow-sm">
-              <div class="flex justify-between items-start">
-                <h4 class="font-bold text-[#4A3E3D] text-base">{{ item.location }}</h4>
+            <div class="flex-1 min-w-0 bg-white rounded-2xl p-4 border border-[#E8DFD8] hover:border-[#8C7662] transition-colors shadow-sm">
+              <div class="flex justify-between items-start w-full">
+                <h4 class="font-bold text-[#4A3E3D] text-base break-words w-full">{{ item.location }}</h4>
               </div>
-              <p v-if="item.openinghours" class="text-xs mt-2">
+              <p v-if="item.openinghours" class="text-xs mt-2 break-words">
                 <i class="fa-regular fa-clock mr-1 opacity-70"></i>{{ item.openinghours }}
               </p>
-              <p v-if="item.parking" class="text-xs mt-2">
+              <p v-if="item.parking" class="text-xs mt-2 break-words">
                 <i class="fa-solid fa-square-parking mr-1 opacity-70"></i>{{ item.parking }}
               </p>
-              <p v-if="item.note" class="text-xs text-[#7A685A] mt-2 bg-[#FAF6F0] p-2.5 rounded-xl border border-[#F2EAE1] italic">
+              <p v-if="item.note" class="text-xs text-[#7A685A] mt-2 bg-[#FAF6F0] p-2.5 rounded-xl border border-[#F2EAE1] italic break-words">
                 <i class="fa-regular fa-comment-dots mr-1 opacity-70"></i>{{ item.note }}
               </p>
             </div>
