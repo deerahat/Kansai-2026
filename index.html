@@ -492,14 +492,22 @@
   <!-- Vue App Logic Script -->
   <script>
     const { createApp, ref, computed, watch } = Vue;
-    const firebaseConfig = {
-  apiKey: "AIzaSyD0pkX987pHQrbQtZ593xTtF1u-pAERLFQ",
-  authDomain: "kansai-2026.firebaseapp.com",
-  projectId: "kansai-2026",
-  storageBucket: "kansai-2026.firebasestorage.app",
-  messagingSenderId: "609695017182",
-  appId: "1:609695017182:web:9301ce2825393c70c2fa4f"
+    // 貼上你剛剛在步驟二複製的專屬設定
+   const firebaseConfig = {
+     const firebaseConfig = {
+       apiKey: "AIzaSyD0pkX987pHQrbQtZ593xTtF1u-pAERLFQ",
+       authDomain: "kansai-2026.firebaseapp.com",
+       projectId: "kansai-2026",
+       storageBucket: "kansai-2026.firebasestorage.app",
+       messagingSenderId: "609695017182",
+       appId: "1:609695017182:web:9301ce2825393c70c2fa4f"
 };
+   };
+
+   // 初始化 Firebase 實例
+   firebase.initializeApp(firebaseConfig);
+   const database = firebase.database();
+   const tripRef = database.ref('kansai_trip_data'); // 在雲端建立一個叫 kansai_trip_data 的資料夾
 
     createApp({
       setup() {
