@@ -112,9 +112,21 @@
               <p v-if="item.openinghours" class="text-xs mt-2 break-words">
                 <i class="fa-regular fa-clock mr-1 opacity-70"></i>{{ item.openinghours }}
               </p>
-              <p v-if="item.parking" class="text-xs mt-2 break-words">
-                <i class="fa-solid fa-square-parking mr-1 opacity-70"></i>{{ item.parking }}
-              </p>
+              <template v-if="item.parking">
+                <!-- 情況 A：如果是網址 -->
+                <a v-if="item.parking.includes('http')" 
+                   :href="item.parking" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="text-xs mt-2 break-words text-[#7A685A] hover:text-[#4A3E3D] underline inline-flex items-center transition-colors">
+                  <i class="fa-solid fa-square-parking mr-1 opacity-70"></i>點擊前往停車場導航
+                </a>
+
+                <!-- 情況 B：如果是普通文字 -->
+                <p v-else class="text-xs mt-2 break-words">
+                  <i class="fa-solid fa-square-parking mr-1 opacity-70"></i>{{ item.parking }}
+                </p>
+              </template>
               <p v-if="item.note" class="text-xs text-[#7A685A] mt-2 bg-[#FAF6F0] p-2.5 rounded-xl border border-[#F2EAE1] italic break-words whitespace-pre-line">
                 <i class="fa-regular fa-comment-dots mr-1 opacity-70"></i>{{ item.note }}
               </p>
