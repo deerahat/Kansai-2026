@@ -8,6 +8,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Vue 3 -->
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <!-- Supabase JS Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Google Fonts (日系感字體) -->
@@ -485,149 +487,197 @@
 
   </div>
   
-  <!-- Vue App Logic Script -->
-  <script>
-    const { createApp, ref, computed, watch } = Vue;
+<!-- Vue App Logic Script -->
+<script>
+  const { createApp, ref, computed, watch, onMounted } = Vue;
 
-    createApp({
-      setup() {
-        const activeTab = ref('itinerary');
-        const currentDayIndex = ref(0);
-        const exchangeRate = ref(0.050); // 1 JPY = 0.050 HKD
-        const splitPeople = ref(2);
+  createApp({
+    setup() {
+      // ==========================================
+      // 雲端資料庫設定區 (請換成你自己的 URL 與 KEY)
+      // ==========================================
+      const SUPABASE_URL = 'https://nlfksgzxmfbakdorvnrw.supabase.co/';
+      const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sZmtzZ3p4bWZiYWtkb3J2bnJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxNTk0OTEsImV4cCI6MjA5NDczNTQ5MX0._Zv3l163aFenWFKm3WTBLLhgmxSXV0cczr_KgI8hvm8';
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // 預設資料 (和歌山x2, 神戶x1, 大阪x3)
-        const defaultDays = [
-          { 
-            date: '2026/06/04', city: '和歌山', weather: '晴朗', temp: 24,
-            events: [
-              { id: 1, time: '08:30', location: '關西機場出發', cardTemp: 23, note: '領取關西周遊券，搭乘特急前往和歌山。' },
-              { id: 2, time: '11:00', location: '白濱海灘 (白良濱)', cardTemp: 25, note: '看絕美白色沙灘，踩踩海水放鬆。' },
-              { id: 3, time: '15:30', location: '串本潮岬燈塔', cardTemp: 24, note: '造訪本州最南端！燈塔視野無敵遼闊。' }
-            ]
-          },
-          { 
-            date: '2026/06/05', city: '和歌山', weather: '多雲', temp: 23,
-            events: [
-              { id: 4, time: '10:00', location: '黑潮市場', cardTemp: 22, note: '觀看精彩鮪魚解體秀，順便在這裡解決海鮮午餐！' },
-              { id: 5, time: '14:00', location: '和歌山城', cardTemp: 24, note: '爬上天守閣俯瞰市景，感受清幽的日式古城氣氛。' }
-            ]
-          },
-          { 
-            date: '2026/06/06', city: '神戶', weather: '晴朗', temp: 25,
-            events: [
-              { id: 6, time: '10:30', location: '布引瀑布', cardTemp: 22, note: '從新神戶站步行即可抵達，芬多精滿滿的能量景點。' },
-              { id: 7, time: '14:30', location: '北野異人館街', cardTemp: 25, note: '充滿歐洲風情的街道，找間復古咖啡廳坐坐。' },
-              { id: 8, time: '18:30', location: '神戶港夜景', cardTemp: 21, note: '在馬賽克廣場看神戶塔點燈，享用晚餐。' }
-            ]
-          },
-          { 
-            date: '2026/06/07', city: '大阪', weather: '陰天', temp: 26,
-            events: [
-              { id: 9, time: '09:30', location: '大阪城公園', cardTemp: 25, note: '跟宏偉的大阪城天守閣合照，順便散步。' },
-              { id: 10, time: '14:00', location: '心齋橋 / 道頓堀', cardTemp: 27, note: '找跑跑卡丁車招牌打卡，開啟瘋狂購物跟吃章魚燒模式！' }
-            ]
-          },
-          { 
-            date: '2026/06/08', city: '大阪', weather: '陣雨', temp: 22,
-            events: [
-              { id: 11, time: '09:00', location: '日本環球影城', cardTemp: 22, note: '提早排隊入園！必衝超級任天堂世界與哈利波特。' }
-            ]
-          },
-          { 
-            date: '2026/06/09', city: '大阪', weather: '晴朗', temp: 26,
-            events: [
-              { id: 12, time: '11:00', location: '通天閣 / 新世界', cardTemp: 26, note: '體驗昭和風情大阪，午餐吃有名的串炸。' },
-              { id: 13, time: '16:00', location: '臨空城 Outlet', cardTemp: 25, note: '搭機前的最後衝刺血拼！直接買完去機場過海關。' }
-            ]
+      const isSyncing = ref(false); // 用來記錄是否正在同步中
+      
+      const activeTab = ref('itinerary');
+      const currentDayIndex = ref(0);
+      const exchangeRate = ref(0.050);
+      const splitPeople = ref(2);
+
+      // 預設資料
+      const defaultDays = [
+        { 
+          date: '2026/06/04', city: '和歌山', weather: '晴朗', temp: 24,
+          events: [
+            { id: 1, time: '08:30', location: '關西機場出發', cardTemp: 23, note: '領取關西周遊券，搭乘特急前往和歌山。' },
+            { id: 2, time: '11:00', location: '白濱海灘 (白良濱)', cardTemp: 25, note: '看絕美白色沙灘，踩踩海水放鬆。' },
+            { id: 3, time: '15:30', location: '串本潮岬燈塔', cardTemp: 24, note: '造訪本州最南端！燈塔視野無敵遼闊。' }
+          ]
+        },
+        // ... 中間省略，保留你原本的 defaultDays 陣列內容 ...
+        { 
+          date: '2026/06/09', city: '大阪', weather: '晴朗', temp: 26,
+          events: [
+            { id: 12, time: '11:00', location: '通天閣 / 新世界', cardTemp: 26, note: '體驗昭和風情大阪，午餐吃有名的串炸。' },
+            { id: 13, time: '16:00', location: '臨空城 Outlet', cardTemp: 25, note: '搭機前的最後衝刺血拼！直接買完去機場過海關。' }
+          ]
+        }
+      ];
+
+      const defaultShoppingList = [
+        { id: 1, name: '布甸狗大阪限定周邊', bought: false },
+        { id: 2, name: '自駕路上喝的綠茶與零食', bought: true },
+        { id: 3, name: '和歌山梅酒', bought: false }
+      ];
+
+      // 響應式資料容器 (先給預設值，稍後從雲端覆蓋)
+      const days = ref(defaultDays);
+      const expenses = ref([]);
+      const shoppingList = ref(defaultShoppingList);
+
+      // ==========================================
+      // 核心 1：從 Supabase 下載資料
+      // ==========================================
+      const loadFromCloud = async () => {
+        isSyncing.value = true;
+        try {
+          const { data, error } = await supabase
+            .from('travel_data')
+            .select('payload')
+            .eq('id', 1)
+            .single();
+
+          if (error) throw error;
+
+          // 如果雲端有存過資料，就覆蓋掉本地預設值
+          if (data && data.payload && Object.keys(data.payload).length > 0) {
+            days.value = data.payload.days || defaultDays;
+            expenses.value = data.payload.expenses || [];
+            shoppingList.value = data.payload.shoppingList || defaultShoppingList;
+            console.log("✅ 成功從雲端載入資料");
           }
-        ];
+        } catch (error) {
+          console.error("讀取雲端資料失敗:", error);
+        } finally {
+          isSyncing.value = false;
+        }
+      };
 
-        const defaultShoppingList = [
-          { id: 1, name: '布甸狗大阪限定周邊', bought: false },
-          { id: 2, name: '自駕路上喝的綠茶與零食', bought: true },
-          { id: 3, name: '和歌山梅酒', bought: false }
-        ];
+      // ==========================================
+      // 核心 2：把資料上傳到 Supabase
+      // ==========================================
+      const saveToCloud = async () => {
+        isSyncing.value = true;
+        try {
+          const syncData = {
+            days: days.value,
+            expenses: expenses.value,
+            shoppingList: shoppingList.value
+          };
 
-        // 讀取 LocalStorage 
-        const days = ref(JSON.parse(localStorage.getItem('kansai_days')) || defaultDays);
-        const expenses = ref(JSON.parse(localStorage.getItem('kansai_expenses')) || []);
-        const shoppingList = ref(JSON.parse(localStorage.getItem('kansai_shopping')) || defaultShoppingList);
+          const { error } = await supabase
+            .from('travel_data')
+            .update({ payload: syncData })
+            .eq('id', 1);
 
-        // 數據自動儲存監聽
-        watch(days, (newVal) => localStorage.setItem('kansai_days', JSON.stringify(newVal)), { deep: true });
-        watch(expenses, (newVal) => localStorage.setItem('kansai_expenses', JSON.stringify(newVal)), { deep: true });
-        watch(shoppingList, (newVal) => localStorage.setItem('kansai_shopping', JSON.stringify(newVal)), { deep: true });
+          if (error) throw error;
+          console.log("☁️ 資料已同步至雲端");
+        } catch (error) {
+          console.error("同步到雲端失敗:", error);
+        } finally {
+          isSyncing.value = false;
+        }
+      };
 
-        // 購物清單功能
-        const newShoppingItem = ref('');
-        const boughtCount = computed(() => shoppingList.value.filter(item => item.bought).length);
-        const shoppingProgress = computed(() => shoppingList.value.length === 0 ? 0 : (boughtCount.value / shoppingList.value.length) * 100);
+      // 當網頁一開啟，自動執行下載
+      onMounted(() => {
+        loadFromCloud();
+      });
 
-        const addShoppingItem = () => {
-          if (!newShoppingItem.value.trim()) return;
-          shoppingList.value.unshift({ id: Date.now(), name: newShoppingItem.value.trim(), bought: false });
-          newShoppingItem.value = '';
-        };
-        const toggleBought = (item) => item.bought = !item.bought;
-        const deleteShoppingItem = (id) => shoppingList.value = shoppingList.value.filter(item => item.id !== id);
+      // ==========================================
+      // 核心 3：監聽資料變更，自動觸發雲端存檔 (加入防抖)
+      // ==========================================
+      let timeoutId = null;
+      watch([days, expenses, shoppingList], () => {
+        // 延遲 1 秒後才上傳，避免打字時頻繁觸發資料庫連線
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          saveToCloud();
+        }, 1000);
+      }, { deep: true });
 
-        // 記帳功能邏輯
-        const newExpense = ref({ title: '', category: '餐飲', amountJPY: null });
-        const totalExpenseHKD = computed(() => expenses.value.reduce((sum, exp) => sum + parseFloat(exp.amountHKD), 0).toFixed(1));
-        const perPersonHKD = computed(() => (!splitPeople.value || splitPeople.value <= 0) ? totalExpenseHKD.value : (parseFloat(totalExpenseHKD.value) / splitPeople.value).toFixed(1));
+      // ==========================================
+      // 以下完全保留你原本的邏輯，無需更動
+      // ==========================================
+      const newShoppingItem = ref('');
+      const boughtCount = computed(() => shoppingList.value.filter(item => item.bought).length);
+      const shoppingProgress = computed(() => shoppingList.value.length === 0 ? 0 : (boughtCount.value / shoppingList.value.length) * 100);
 
-        const addExpense = () => {
-          if (!newExpense.value.title || !newExpense.value.amountJPY) return;
-          expenses.value.unshift({
-            id: Date.now(),
-            title: newExpense.value.title,
-            category: newExpense.value.category,
-            amountJPY: newExpense.value.amountJPY,
-            amountHKD: (newExpense.value.amountJPY * exchangeRate.value).toFixed(1)
-          });
-          newExpense.value.title = '';
-          newExpense.value.amountJPY = null;
-        };
-        const deleteExpense = (id) => expenses.value = expenses.value.filter(e => e.id !== id);
+      const addShoppingItem = () => {
+        if (!newShoppingItem.value.trim()) return;
+        shoppingList.value.unshift({ id: Date.now(), name: newShoppingItem.value.trim(), bought: false });
+        newShoppingItem.value = '';
+      };
+      const toggleBought = (item) => item.bought = !item.bought;
+      const deleteShoppingItem = (id) => shoppingList.value = shoppingList.value.filter(item => item.id !== id);
 
-        // 行程編輯彈跳視窗邏輯
-        const showModal = ref(false);
-        const isEditMode = ref(false);
-        const modalData = ref({ time: '', location: '', note: '', cardTemp: null });
-        let activeEventIndex = null;
+      const newExpense = ref({ title: '', category: '餐飲', amountJPY: null });
+      const totalExpenseHKD = computed(() => expenses.value.reduce((sum, exp) => sum + parseFloat(exp.amountHKD), 0).toFixed(1));
+      const perPersonHKD = computed(() => (!splitPeople.value || splitPeople.value <= 0) ? totalExpenseHKD.value : (parseFloat(totalExpenseHKD.value) / splitPeople.value).toFixed(1));
 
-        const openAddModal = () => { isEditMode.value = false; modalData.value = { time: '', location: '', note: '', cardTemp: null }; showModal.value = true; };
-        const openEditModal = (item, idx) => { isEditMode.value = true; activeEventIndex = idx; modalData.value = { ...item }; showModal.value = true; };
-        
-        const saveEvent = () => {
-          if (!modalData.value.time || !modalData.value.location) return;
-          if (!modalData.value.cardTemp) modalData.value.cardTemp = days.value[currentDayIndex.value].temp;
-          if (isEditMode.value) days.value[currentDayIndex.value].events[activeEventIndex] = { ...modalData.value };
-          else {
-            days.value[currentDayIndex.value].events.push({ id: Date.now(), ...modalData.value });
-            days.value[currentDayIndex.value].events.sort((a, b) => a.time.localeCompare(b.time));
-          }
-          closeModal();
-        };
+      const addExpense = () => {
+        if (!newExpense.value.title || !newExpense.value.amountJPY) return;
+        expenses.value.unshift({
+          id: Date.now(),
+          title: newExpense.value.title,
+          category: newExpense.value.category,
+          amountJPY: newExpense.value.amountJPY,
+          amountHKD: (newExpense.value.amountJPY * exchangeRate.value).toFixed(1)
+        });
+        newExpense.value.title = '';
+        newExpense.value.amountJPY = null;
+      };
+      const deleteExpense = (id) => expenses.value = expenses.value.filter(e => e.id !== id);
 
-        const deleteEvent = () => { if (isEditMode.value && activeEventIndex !== null) days.value[currentDayIndex.value].events.splice(activeEventIndex, 1); closeModal(); };
-        const closeModal = () => { showModal.value = false; activeEventIndex = null; };
+      const showModal = ref(false);
+      const isEditMode = ref(false);
+      const modalData = ref({ time: '', location: '', note: '', cardTemp: null });
+      let activeEventIndex = null;
 
-        // 輔助小工具
-        const getWeatherIcon = (status) => status === '晴朗' ? 'fa-solid fa-sun' : status === '多雲' ? 'fa-solid fa-cloud-sun' : status === '陰天' ? 'fa-solid fa-cloud' : 'fa-solid fa-cloud-showers-heavy';
-        const getCategoryIcon = (cat) => ({ '餐飲': '🍱', '交通': '🚇', '住宿': '🏨', '購物': '🛍️', '景點': '🎟️' }[cat] || '💰');
-        const getMockCoords = (index) => [{ top: '25%', left: '55%' }, { top: '45%', left: '68%' }, { top: '70%', left: '42%' }, { top: '50%', left: '20%' }][index % 4];
-        const refreshLocation = () => alert("已校準至關西地區鄰近基地台！");
+      const openAddModal = () => { isEditMode.value = false; modalData.value = { time: '', location: '', note: '', cardTemp: null }; showModal.value = true; };
+      const openEditModal = (item, idx) => { isEditMode.value = true; activeEventIndex = idx; modalData.value = { ...item }; showModal.value = true; };
+      
+      const saveEvent = () => {
+        if (!modalData.value.time || !modalData.value.location) return;
+        if (!modalData.value.cardTemp) modalData.value.cardTemp = days.value[currentDayIndex.value].temp;
+        if (isEditMode.value) days.value[currentDayIndex.value].events[activeEventIndex] = { ...modalData.value };
+        else {
+          days.value[currentDayIndex.value].events.push({ id: Date.now(), ...modalData.value });
+          days.value[currentDayIndex.value].events.sort((a, b) => a.time.localeCompare(b.time));
+        }
+        closeModal();
+      };
 
-        return {
-          activeTab, currentDayIndex, days, exchangeRate, splitPeople, expenses, newExpense, totalExpenseHKD, perPersonHKD,
-          shoppingList, newShoppingItem, boughtCount, shoppingProgress, addShoppingItem, toggleBought, deleteShoppingItem,
-          showModal, isEditMode, modalData, addExpense, deleteExpense, openAddModal, openEditModal, saveEvent, deleteEvent, closeModal,
-          getWeatherIcon, getCategoryIcon, getMockCoords, refreshLocation
-        };
-      }
-    }).mount('#app');
-  </script>
+      const deleteEvent = () => { if (isEditMode.value && activeEventIndex !== null) days.value[currentDayIndex.value].events.splice(activeEventIndex, 1); closeModal(); };
+      const closeModal = () => { showModal.value = false; activeEventIndex = null; };
+
+      const getWeatherIcon = (status) => status === '晴朗' ? 'fa-solid fa-sun' : status === '多雲' ? 'fa-solid fa-cloud-sun' : status === '陰天' ? 'fa-solid fa-cloud' : 'fa-solid fa-cloud-showers-heavy';
+      const getCategoryIcon = (cat) => ({ '餐飲': '🍱', '交通': '🚇', '住宿': '🏨', '購物': '🛍️', '景點': '🎟️' }[cat] || '💰');
+      const getMockCoords = (index) => [{ top: '25%', left: '55%' }, { top: '45%', left: '68%' }, { top: '70%', left: '42%' }, { top: '50%', left: '20%' }][index % 4];
+      const refreshLocation = () => alert("已校準至關西地區鄰近基地台！");
+
+      return {
+        isSyncing, // 如果你想在畫面上顯示「同步中...」的字樣，可以綁定這個變數
+        activeTab, currentDayIndex, days, exchangeRate, splitPeople, expenses, newExpense, totalExpenseHKD, perPersonHKD,
+        shoppingList, newShoppingItem, boughtCount, shoppingProgress, addShoppingItem, toggleBought, deleteShoppingItem,
+        showModal, isEditMode, modalData, addExpense, deleteExpense, openAddModal, openEditModal, saveEvent, deleteEvent, closeModal,
+        getWeatherIcon, getCategoryIcon, getMockCoords, refreshLocation
+      };
+    }
+  }).mount('#app');
+</script>
 </body>
 </html>
