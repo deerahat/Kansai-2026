@@ -113,7 +113,6 @@
                 <i class="fa-regular fa-clock mr-1 opacity-70"></i>{{ item.openinghours }}
               </p>
               <template v-if="item.parking">
-                <!-- 情況 A：如果是網址 -->
                 <!-- 用 p 標籤包住，並加上 mt-2 控制與上方的間距 -->
                 <p v-if="item.parking.includes('http')" class="text-xs mt-2 flex items-center">
                    <!-- 1. 放在超連結外面的 icon（沒有超連結效果） -->
@@ -123,6 +122,7 @@
                    <a :href="item.parking"
                       target="_blank"
                       rel="noopener noreferrer"
+                      @click.stop
                       class="break-words text-[#7A685A] hover:text-[#4A3E3D] underline transition-colors">點擊前往停車場導航
                   </a>
                 </p>
