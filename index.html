@@ -485,9 +485,21 @@
 
   </div>
 
+  <!-- 引入 Firebase 核心與 Realtime Database 功能 -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  
   <!-- Vue App Logic Script -->
   <script>
     const { createApp, ref, computed, watch } = Vue;
+    const firebaseConfig = {
+  apiKey: "AIzaSyD0pkX987pHQrbQtZ593xTtF1u-pAERLFQ",
+  authDomain: "kansai-2026.firebaseapp.com",
+  projectId: "kansai-2026",
+  storageBucket: "kansai-2026.firebasestorage.app",
+  messagingSenderId: "609695017182",
+  appId: "1:609695017182:web:9301ce2825393c70c2fa4f"
+};
 
     createApp({
       setup() {
@@ -549,15 +561,38 @@
           { id: 3, name: '和歌山梅酒', bought: false }
         ];
 
-        // 讀取 LocalStorage 
-        const days = ref(JSON.parse(localStorage.getItem('kansai_days')) || defaultDays);
-        const expenses = ref(JSON.parse(localStorage.getItem('kansai_expenses')) || []);
-        const shoppingList = ref(JSON.parse(localStorage.getItem('kansai_shopping')) || defaultShoppingList);
+        // 1. 初始化定義響應式變數（預設先給空陣列，等雲端下載）
+        const days = ref([]);
+        const expenses = ref([]);
+        const shoppingList = ref([]);
 
-        // 數據自動儲存監聽
-        watch(days, (newVal) => localStorage.setItem('kansai_days', JSON.stringify(newVal)), { deep: true });
-        watch(expenses, (newVal) => localStorage.setItem('kansai_expenses', JSON.stringify(newVal)), { deep: true });
-        watch(shoppingList, (newVal) => localStorage.setItem('kansai_shopping', JSON.stringify(newVal)), { deep: true });
+        // 2. 監聽 Firebase 雲端資料庫的變動（一有變動，所有設備同步更新！）
+        tripRef.on('value', (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            // 如果雲端有資料，直接覆蓋本地變數
+            days.value = data.days || defaultDays;
+            expenses.value = data.expenses || [];
+            shoppingList.value = data.shopping || defaultShoppingList;
+          } else {
+            // 如果雲端完全沒資料（第一次初始化），就把你的預設資料推上雲端
+            tripRef.set({
+              ays: defaultDays,
+              expenses: [],
+              shopping: defaultShoppingList
+            });
+          }
+        });
+
+        // 3. 當使用者在網頁上修改資料時，自動同步推送回 Firebase 雲端
+        watch([days, expenses, shoppingList], () => {
+          // 這裡使用 debounce 或直接更新
+          tripRef.set({
+            days: JSON.parse(JSON.stringify(days.value)),
+            expenses: JSON.parse(JSON.stringify(expenses.value)),
+            shopping: JSON.parse(JSON.stringify(shoppingList.value))
+          });
+        }, { deep: true });
 
         // 購物清單功能
         const newShoppingItem = ref('');
