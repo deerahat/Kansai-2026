@@ -127,9 +127,17 @@
                   </a>
                 </p>
               </template>
-              <p v-if="item.note" class="text-xs text-[#7A685A] mt-2 bg-[#FAF6F0] p-2.5 rounded-xl border border-[#F2EAE1] italic break-words whitespace-pre-line leading-relaxed">
-                <i class="mr-1 opacity-70"></i>{{ item.note }}
-              </p>
+              <template v-if="item.note">
+                <!-- 用 p 標籤包住，並加上 mt-2 控制與上方的間距 -->
+                <p v-if="item.note.includes('http')" text-xs text-[#7A685A] mt-2 bg-[#FAF6F0] p-2.5 rounded-xl border border-[#F2EAE1] italic break-words whitespace-pre-line leading-relaxed">
+                   <a :href="item.note"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      @click.stop
+                      class="break-words text-[#7A685A] hover:text-[#4A3E3D] underline transition-colors">點擊前往
+                  </a>
+                </p>
+              </template>
             </div>
           </div>
 
